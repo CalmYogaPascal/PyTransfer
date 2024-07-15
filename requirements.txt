@@ -1,0 +1,17 @@
+argon2-cffi==23.1.0
+argon2-cffi-bindings==21.2.0
+certifi==2024.7.4
+cffi==1.16.0
+grpcio==1.65.0
+grpcio-tools==1.65.0
+minio==7.2.7
+protobuf==5.27.2
+pycparser==2.22
+pycryptodome==3.20.0
+PySide6==6.7.2
+PySide6_Addons==6.7.2
+PySide6_Essentials==6.7.2
+shiboken6==6.7.2
+typing_extensions==4.12.2
+urllib3==2.2.2
+watchdog==4.0.1

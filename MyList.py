@@ -1,5 +1,4 @@
 from typing import List
-from MyListItem import MyListItem
 
 
 import PySide6.QtCore
@@ -11,6 +10,7 @@ import logging
 
 
 class MyList(PySide6.QtWidgets.QTreeWidget):
+    ItemDrop = PySide6.QtCore.Signal(str,int,int)
     def __init__(self, parent = None):
         super().__init__(parent)
         self.setSelectionMode(PySide6.QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
@@ -29,41 +29,47 @@ class MyList(PySide6.QtWidgets.QTreeWidget):
         else:
             event.ignore()
 
-    def _CanDrop(self, event: PySide6.QtGui.QDropEvent) -> bool:
+    def _CanDrop(self, event: PySide6.QtGui.QDropEvent):
         if event.source() is self:
-            return False
+            return False, (None, None, None)
         OtherList: MyList = event.source()
         logging.info("Source: %s", event.source().objectName())
         
         logging.info("Source: %s", OtherList.objectName())
         NewItem = OtherList.currentItem()
-        result = self._HasItem(NewItem.text(0), int(NewItem.text(1)), int(NewItem.text(2)))
+        result = self._HasItem(NewItem.text(0), NewItem.text(1), NewItem.text(2))
+        from datetime import datetime
+        
         print("%s %s" % (result, not result))
-        return not result
+        return not result, (NewItem.text(0), int(NewItem.text(1)), int(datetime.fromisoformat(NewItem.text(2)).timestamp()))
         
     
-    def _HasItem(self, filename: str, filesize: int, LastModified: int)-> bool:
-        def CheckTree(tree) -> bool | None:
-            for k, v, in tree.items():
-                if k != filename:
-                    continue
-                if type(v) == dict:
-                    result = CheckTree(v)
-                    if result != None:
-                        return result
-                else:
-                    if filesize == v[0] and LastModified == v[1]:
-                        return True
+    def _HasItem(self, filename: str, filesize: str, LastModified: str)-> bool:
+        def CheckTree(tree: PySide6.QtWidgets.QTreeWidgetItem) -> bool | None:
+            
+            print("%s::%s" % (tree.text(0),filename))
+            if tree.text(0) == filename and tree.text(1) == filesize and tree.text(2) == LastModified:
+                return True
+            for i in range(0,tree.childCount()):
+                item = tree.child(i)
+                if item.text(0) == filename and item.text(1) == filesize and item.text(2) == LastModified:
+                    return True
+                CheckTree(item)
             return None
-        result = CheckTree(self._list)
-        if result == None:
-            result = False
-        return result   
         
+        for i in range(0, self.topLevelItemCount()):
+            subtreeitem: PySide6.QtWidgets.QTreeWidgetItem = self.topLevelItem(i)
+            if CheckTree(subtreeitem):
+                print("Found: %s", subtreeitem.text(0))
+                return True
+        
+        return False
     def UpdateTree(self, inList: dict) -> None:
         self._list = inList
+        self.clear()
         def GetChildren(InDict: dict) -> List[PySide6.QtWidgets.QTreeWidgetItem]:
 
+            print(InDict)
             lister = [] 
             for k, v in InDict.items():
                 if type(v) == dict:
@@ -76,7 +82,10 @@ class MyList(PySide6.QtWidgets.QTreeWidget):
                     lister.append(childitem)
                     
             return lister
-        childs = GetChildren(inList)
+        childs = []
+        for l in inList:
+            childs.extend(GetChildren(l))
+        #childs = GetChildren(inList)
         self.addTopLevelItems(childs)
         
     def startDrag(self, supportedActions: PySide6.QtCore.Qt.DropAction):
@@ -86,11 +95,13 @@ class MyList(PySide6.QtWidgets.QTreeWidget):
         super().startDrag(supportedActions)
 
     def dropEvent(self, event: PySide6.QtGui.QDropEvent):
-        if self._CanDrop(event):
+        candrop, droppeditem = self._CanDrop(event)
+        if candrop:
             logging.info("Can drop")
             
             super().dropEvent(event)
             event.accept()
+            self.ItemDrop.emit(droppeditem[0],droppeditem[1],droppeditem[2])
             
         else:
             event.ignore()

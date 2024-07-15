@@ -1,6 +1,7 @@
+import typing
 import protos.Files_pb2 as Files
 import protos.Files_pb2_grpc as FilesAuth
-import protos.User_pb2 as Users
+import User_pb2 as Users
 
 
 import grpc
@@ -17,54 +18,47 @@ from os.path import isfile, join
 class FilesManager:
     def __init__(
         self,
-        channel: grpc.Channel
+        channel
     ) -> None:
         self._channel = channel
-        self._stub = FilesAuth.UserFileSystemInfoStub(self._channel)
+        self._stub = FilesAuth.UserFileSystemInfoStub(channel)
+        self.event = asyncio.Event()
+        self.Quiting = False
+        self._requests = typing.Set[Files.File]
 
-    async def RequestFiles(self, login: str) -> None:
+    async def RequestFilesFromUser(self, login: str):
         request = Users.UserInfo(login=login)
         print("Request: %s" % (request))
-        result = await self._stub.Request(request)
+        result = await self._stub.RequestFilesFromUser(request)
         print(result)
+        return result
 
-    event = asyncio.Event
-    state_iterator = []
+    async def StreamFiles(self):
+        requests, responses = 0,0
+        print("%s %s" % (requests, responses))
+        async def ListDir():
+            nonlocal requests, responses
+            print("3: %s %s %s" % (requests, responses, not self.Quiting))
+            while not self.Quiting:
+                print("4: %s %s %s" % (requests, responses, not self.Quiting))
+                while requests - responses >= 1:
+                    await asyncio.sleep(1)
+                files = [f for f in os.listdir() if os.path.isfile(f)]
+                requests+=1
+                dirr = Files.Directory()
+                for file in files:
+                    filesize = os.stat(os.path.abspath(file)).st_size
+                    filemtime = os.stat(os.path.abspath(file)).st_mtime
+                    DirectoryFile = dirr.files.add()
+                    DirectoryFile.Name = file
+                    DirectoryFile.FileSize = filesize
+                    DirectoryFile.LastDate = int(filemtime)
+                print("Files: %s" % (files))
+                yield dirr
 
-    async def StreamFilesRequest(self) -> None:
-        logging.info("Nice")
-        async def request_():
-            onlyfiles = [f for f in listdir(".") if isfile(join(".", f))]
-
-            print(onlyfiles)
-            t=Files.Directory()
-            for k in onlyfiles:
-                file = Files.File
-                file.FileSize = os.path.getsize(k)
-                file.LastDate = os.path.getmtime(k)
-                file.Name = k
-                t.FilePath.append(file)
-
-            print(onlyfiles)
-            print(t)
-            yield t
-
-            while True:
-                await self.event.wait(self.event)
-                self.event.clear(self.event)
-                onlyfiles = [f for f in listdir(".") if isfile(join(".", f))]
-
-                t=Files.Directory()
-                for k in onlyfiles:
-                    #print(k)
-                    t.FilePath.append(k)
-
-                yield t
-
-        self.state_iterator = self._stub.SendFileInfo(request_())
-
-    async def StreamFilesReceive(self) -> None:
-        async for response in self.state_iterator:
-            self.event.set(self.event)
-            logging.info(response)
-        logging.warning("No streaming")
+        print("1: %s %s" % (requests, responses))
+        async for response in self._stub.StreamDirectory(ListDir()):
+            print("2: %s %s" % (requests, responses))
+            print(response)
+            responses+=1
+            await asyncio.sleep(1)

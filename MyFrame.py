@@ -3,6 +3,7 @@ from MyList import MyList
 
 
 import PySide6
+import PySide6.QtWidgets
 
 
 import logging
@@ -24,24 +25,27 @@ class MyFrame(PySide6.QtWidgets.QWidget):
         self.vbox.addWidget(self.tree)
         self.setLayout(self.vbox)
         self.setMinimumWidth(500)
-        files = {
-            "%s" % (self): (random.randint(1,2*1024*1024), random.randint(10,1024*1024*1024)),
-            "filename2.jpg": (5, 7),
-        }
+        files = [
+            {"%s" % (self): (random.randint(1,2*1024*1024), random.randint(10,1024*1024*1024))},
+            {"filename2.jpg": (5, 7)},
+        ]
         self.tree.UpdateTree(files)
         
     
     def UpdateCombo(self, inList: List[str]) -> str | None:
         logging.info("UpdateCombo")
         currText = self.box.currentText()
+        print(currText)
         self.box.clear()
-        self.box.addItems(List)
+        self.box.addItems(inList)
 
-        if inList.count() == 0:
+        if inList.__len__() == 0:
             return None
         try:
             index = inList.index(currText)
+            self.box.setCurrentIndex(index)
         except ValueError:
+            self.box.setCurrentIndex(0)
             return inList[0]
 
         for i, v in inList.__iter__():

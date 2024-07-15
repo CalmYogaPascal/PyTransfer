@@ -1,5 +1,5 @@
 import logging
-import protos.User_pb2 as Users
+import User_pb2 as Users
 import protos.User_pb2_grpc as UsersAuth
 
 
@@ -13,26 +13,27 @@ from typing import List
 class UsersManager:
     def __init__(
         self,
-        channel: grpc.Channel
+        channel
     ) -> None:
         self._channel = channel
         self._stub = UsersAuth.UserAuthorizationStub(self._channel)
 
     async def connect(self) -> None:
         request = Empty()
-        logging.info("Connecting: %s", request)
-        return self._stub.Connect(request)
+        logging.info("Connecting.")
+        await self._stub.Connect(request)
+        logging.info("Connected.")
 
     async def disconnect(self) -> None:
         request = Empty()
-        self.connect()
+        logging.info("Disconnecting.")
         await self._stub.Disconnect(request)
+        logging.info("Disconnected.")
 
     async def get_users(self) -> List[str]:
         request = Empty()
-        logging.info("%s" % (self._stub.GetUsers(request)))
         result: Users.UsersInfo = await self._stub.GetUsers(request)
-        resultlist = []
+        resultlist = list()
         for k in result.users:
             resultlist.append(k.login)
         return resultlist
