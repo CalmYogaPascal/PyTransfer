@@ -98,8 +98,7 @@ async def run():
             await asyncio.sleep(1)
         
         await users.disconnect()
-    wd_future.result()
-    executor.shutdown()
+    executor.shutdown(cancel_futures=True)
 
     
         
