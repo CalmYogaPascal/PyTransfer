@@ -61,7 +61,7 @@ class MyWindow(PySide6.QtWidgets.QMainWindow):
         frame = self._leftFrame
         self._leftLogin = frame.box.currentText()
         leftLogin = self._leftLogin
-        frame.setEnabled(False)
+        #frame.setEnabled(False)
         files: Directory = await self._files.RequestFilesFromUser(frame.box.currentText())
         if leftLogin != self._leftLogin:
             return
@@ -83,7 +83,7 @@ class MyWindow(PySide6.QtWidgets.QMainWindow):
         frame = self._rightFrame
         self._rightLogin = frame.box.currentText()
         rightLogin = self._rightLogin
-        frame.setEnabled(False)
+        #frame.setEnabled(False)
         files: Directory = await self._files.RequestFilesFromUser(frame.box.currentText())
         if rightLogin != self._rightLogin:
             return

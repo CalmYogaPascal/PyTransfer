@@ -1,5 +1,5 @@
 import logging
-import User_pb2 as Users
+import protos.User_pb2 as Users
 import protos.User_pb2_grpc as UsersAuth
 
 

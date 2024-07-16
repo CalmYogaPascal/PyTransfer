@@ -1,18 +1,10 @@
 import typing
 import protos.Files_pb2 as Files
 import protos.Files_pb2_grpc as FilesAuth
-import User_pb2 as Users
-
-
-import grpc
-
+import protos.User_pb2 as Users
 
 import asyncio
-import logging
 import os
-from concurrent.futures import ThreadPoolExecutor
-from os import listdir
-from os.path import isfile, join
 
 
 class FilesManager:

@@ -4,15 +4,10 @@ import os
 import typing
 
 import grpc
-import User_pb2 as Users
 import protos.Transfer_pb2 as Transfer
 import protos.Transfer_pb2_grpc as TransferAuth
 
 from google.protobuf.empty_pb2 import Empty
-
-
-from typing import List
-
 
 class TransferManager:
     def __init__(

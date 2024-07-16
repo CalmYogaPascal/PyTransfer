@@ -45,7 +45,7 @@ class FSMinioWatchDog(FileSystemEventHandler):
         if event.is_directory or event.event_type=="opened":
             return None
     
-        elif event.event_type == 'created' or event.event_type=="modified" or event.event_type=="closed":
+        elif event.event_type == 'created' or event.event_type=="modified":
             src_path = event.src_path
             if event.dest_path:
                 src_path = event.dest_path
@@ -54,7 +54,7 @@ class FSMinioWatchDog(FileSystemEventHandler):
             result = self.client.fput_object(
                 self.bucket_name, dest_path, src_path,
             )
-            result.
+            
 
             
 
