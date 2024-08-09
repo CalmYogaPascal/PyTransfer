@@ -101,7 +101,9 @@ async def run():
     wd_future.result()
     executor.shutdown()
 
-    
+def test_answer():
+    f_credentials = open("credentials.json")
+    assert f_credentials
         
 if __name__ == "__main__":
     import sys
