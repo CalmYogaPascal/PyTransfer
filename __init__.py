@@ -103,6 +103,7 @@ async def run():
 
 def test_answer():
     f_credentials = open("credentials.json")
+    
     assert f_credentials
         
 if __name__ == "__main__":
