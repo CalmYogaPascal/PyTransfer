@@ -96,10 +96,9 @@ async def run():
         logging.info("Running")
         while not files.Quiting:
             await asyncio.sleep(1)
-        
-        await users.disconnect()    
-    wd_future.result()
-    executor.shutdown()
+            
+        await users.disconnect()
+    executor.shutdown(cancel_futures=True)
 
     
         
