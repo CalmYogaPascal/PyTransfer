@@ -96,11 +96,15 @@ async def run():
         logging.info("Running")
         while not files.Quiting:
             await asyncio.sleep(1)
-            
-        await users.disconnect()
-    executor.shutdown(cancel_futures=True)
+        
+        await users.disconnect()    
+    wd_future.result()
+    executor.shutdown()
 
+def test_answer():
+    f_credentials = open("credentials.json")
     
+    assert f_credentials
         
 if __name__ == "__main__":
     import sys
