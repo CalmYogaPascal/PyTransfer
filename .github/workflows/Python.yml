@@ -26,10 +26,17 @@ jobs:
     - name: Install Python Tools
       run: |
         python -m pip install pylint
+        pip install coverage
 
-    - name: Cache Conan packages
+    - name: Cache Pip packages
       run: |
         pip install -r requirements.txt
+
+    -name: Coverage
+      coverage run --source=./ -m pytest -m 'unit or integration' -s --junit-xml=$TEST_REPORT_XML
+      coverage report
+      coverage xml
+
 
     - name: PyLint
       run: | 
