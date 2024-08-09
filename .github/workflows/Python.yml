@@ -35,7 +35,7 @@ jobs:
 
     - name: Coverage
       run: |
-        coverage run --source=./ -m pytest -m 'unit or integration' -s --junit-xml=$TEST_REPORT_XML
+        coverage run --source=. -m pytest -m 'unit or integration' -s --junit-xml=$TEST_REPORT_XML
         coverage report
         coverage xml
 
