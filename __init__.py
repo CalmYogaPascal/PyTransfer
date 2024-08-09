@@ -71,9 +71,6 @@ def minio_watchdog(credentials):
         observer.stop()
         observer.join()
 
-#pylint, pytest, clang styles
-#ccache
-#test
 
 async def run():
     print("Running")
